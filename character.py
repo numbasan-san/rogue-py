@@ -1,4 +1,6 @@
 
+from map_setings.game_map import Game_Map
+
 class Character:
 
     # general base to create any character I need

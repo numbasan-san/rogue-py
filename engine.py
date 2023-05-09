@@ -1,5 +1,6 @@
 
 import sys, os, input_handler, render
+from map_setings.game_map import Game_Map
 from character import Character
 import tcod as libtcod
 
@@ -11,10 +12,28 @@ def main():
     screen_w = 80
     screen_h = 50
 
-    # entety declare
+    # map size
+    map_w = 80
+    map_h = 45
+
+    # romms size and number
+    room_max_size = 16
+    room_min_size = 6
+    max_rooms = 30
+
+    colors = {
+        'dark_wall': libtcod.Color(0, 50, 100),
+        'dark_ground': libtcod.Color(75, 75, 100)
+    }
+
+    # map declare
+    game_map = Game_Map(map_w, map_h)
+
+    # enteties declare
     player = Character(int(screen_w / 2), int(screen_h / 2), '@', libtcod.orange)
     npc = Character(int(screen_w / 2 - 5), int(screen_h / 2 - 5), '$', libtcod.purple)
     entities = [player, npc]
+    game_map.make_map(max_rooms, room_min_size, room_max_size, map_w, map_h, player) # create map
 
     #load screen
     libtcod.console_set_custom_font(FONT_FILE, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
@@ -28,13 +47,8 @@ def main():
     while not libtcod.console_is_window_closed():
         # load screen elements
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
-        # libtcod.console_set_default_foreground(con, libtcod.white)
-        # libtcod.console_put_char(con, player.x, player.y, player.char, libtcod.BKGND_NONE)
-            # "refresh" the screen
-        # libtcod.console_blit(con, 0, 0, screen_w, screen_h, 0, 0, 0)
-        render.render_all(con, entities, screen_w, screen_h)
+        render.render_all(con, entities, game_map, screen_w, screen_h, colors) # render all elements
         libtcod.console_flush()
-        # libtcod.console_put_char(con, player.x, player.y, ' ', libtcod.BKGND_NONE)
         render.clear_all(con, entities)
 
         # key effects/actions
@@ -46,7 +60,8 @@ def main():
 
         if move:
             dx, dy = move
-            player.move(dx, dy)
+            if not game_map.is_blocked(player.x + dx, player.y + dy): # wall collision
+                player.move(dx, dy)
         if exit:
             return True
         

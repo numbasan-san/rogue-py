@@ -11,6 +11,10 @@ def keys_comands(key):
         return {'move': (0, 1)}
     elif key.vk == libtcod.KEY_LEFT:
         return {'move': (-1, 0)}
+    '''
+    elif key.vk == (libtcod.KEY_RIGHT and libtcod.KEY_DOWN):
+        return {'move': (1, 1)}
+    '''
 
     # keyboard attachment
     if key.vk == (libtcod.KEY_ENTER and key.lalt): # Fullscreen
