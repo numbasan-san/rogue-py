@@ -1,5 +1,5 @@
 
-from map_setings.game_map import Game_Map
+# from map_setings.game_map import Game_Map
 
 class Character:
 

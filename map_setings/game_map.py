@@ -1,5 +1,7 @@
 
 import random
+import tcod as libtcod
+from character import Character
 from map_setings.rectangle import Rect
 from map_setings.tile import Tile
 
@@ -16,18 +18,19 @@ class Game_Map:
         
         return tiles
     
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_w, map_h, player): # map creation
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_w, map_h, player, entities, max_monsters_room): # map creation
         
         rooms = []
         num_rooms = 0
 
         for r in range(max_rooms):
+            # set coors and dimentions of any room
             w = random.randint(room_min_size, room_max_size)
             h = random.randint(room_min_size, room_max_size)
             x = random.randint(0, map_w - w - 1)
             y = random.randint(0, map_h - h - 1)
 
-            new_room = Rect(x, y, w, h)
+            new_room = Rect(x, y, w, h) # set a new room
             for other_room in rooms:
                 if new_room.intersect(other_room): # prevente cross rooms
                     break
@@ -46,6 +49,7 @@ class Game_Map:
                     else:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
+            self.place_entities(new_room, entities, max_monsters_room)
             rooms.append(new_room)
             num_rooms += 1
 
@@ -69,3 +73,17 @@ class Game_Map:
         if self.tiles[x][y].blocked:
             return True
         return False
+
+    def place_entities(self, room, entities, max_monsters_room): # load enemies
+        
+        num_monsters = random.randint(0, max_monsters_room)
+
+        for i in range(num_monsters):
+            x = random.randint(room.x1 + 1, room.y2 - 1)
+            y = random.randint(room.y1 + 1, room.y2 - 1)
+            if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                if random.randint(0, 100) < 80: 
+                    monster = Character(x, y, 'o', libtcod.desaturated_green)
+                else:
+                    monster = Character(x, y, 'o', libtcod.darker_green)
+                entities.append(monster)

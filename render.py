@@ -1,19 +1,27 @@
 
 import tcod as libtcod
 
-def render_all(con, entites, game_map, screen_w, screen_h, colors):
-
-    for y in range(game_map.h): # all estructures are rendered
-        for x in range(game_map.w):
-            wall = game_map.tiles[x][y].block_sight
-
-            if wall:
-                libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
-            else:
-                libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
+def render_all(con, entites, game_map, fov_map, fov_recompute, screen_w, screen_h, colors):
+    if fov_recompute:
+        for y in range(game_map.h): # all estructures are rendered
+            for x in range(game_map.w):
+                visible = fov_map.fov[y][x]
+                wall = game_map.tiles[x][y].block_sight
+                if visible: # light all what is inside player's fov                    
+                    if wall:
+                        libtcod.console_set_char_background(con, x, y, colors.get('light_wall'), libtcod.BKGND_SET)
+                    else:
+                        libtcod.console_set_char_background(con, x, y, colors.get('light_ground'), libtcod.BKGND_SET)
+                    game_map.tiles[x][y].explored = True
+                elif game_map.tiles[x][y].explored:
+                    if wall:
+                        libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
+                    else:
+                        libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
 
     for entity in entites: # all entities are rendered
-        draw_entity(con, entity)
+        if fov_map.fov[entity.y][entity.x]:
+            draw_entity(con, entity)
 
         libtcod.console_blit(con, 0, 0, screen_w, screen_h, 0, 0, 0)
 
