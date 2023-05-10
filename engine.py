@@ -43,7 +43,7 @@ def main():
     game_map = Game_Map(map_w, map_h)
 
     # enteties declare
-    player = Character(int(screen_w / 2), int(screen_h / 2), '@', libtcod.orange)
+    player = Character(int(screen_w / 2), int(screen_h / 2), '@', libtcod.orange, 'player', block = True)
     # npc = Character(int(screen_w / 2 - 5), int(screen_h / 2 - 5), '$', libtcod.purple)
     entities = [player]
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_w, map_h, player, entities, max_monsters_room) # create map
@@ -78,8 +78,14 @@ def main():
         if move:
             dx, dy = move
             if not game_map.is_blocked(player.x + dx, player.y + dy): # wall collision
-                fov_recompute = True
-                player.move(dx, dy)
+                coor_x = player.x + dx
+                coor_y = player.y + dy
+                target = player.collition_entity(entities, coor_x, coor_y)
+                if target:
+                    print(f'{target.name} in the way.')
+                else:
+                    fov_recompute = True
+                    player.move(dx, dy)
         if exit:
             return True
         

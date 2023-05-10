@@ -79,11 +79,11 @@ class Game_Map:
         num_monsters = random.randint(0, max_monsters_room)
 
         for i in range(num_monsters):
-            x = random.randint(room.x1 + 1, room.y2 - 1)
+            x = random.randint(room.x1 + 1, room.x2 - 1)
             y = random.randint(room.y1 + 1, room.y2 - 1)
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 if random.randint(0, 100) < 80: 
-                    monster = Character(x, y, 'o', libtcod.desaturated_green)
+                    monster = Character(x, y, 'o', libtcod.desaturated_green, 'Ork', block = True)
                 else:
-                    monster = Character(x, y, 'o', libtcod.darker_green)
+                    monster = Character(x, y, 'T', libtcod.darker_green, 'Tiranid', block = True)
                 entities.append(monster)
