@@ -2,6 +2,8 @@
 import random
 import tcod as libtcod
 from character import Character
+from components.ai import Monster
+from components.fighter import Fighter
 from map_setings.rectangle import Rect
 from map_setings.tile import Tile
 
@@ -12,6 +14,7 @@ class Game_Map:
         self.w = w
         self.h = h
         self.tiles = self.init_tiles()
+        self.id = 0
 
     def init_tiles(self): # init rooms basic elements
         tiles = [[Tile(True) for y in range(self.h)] for x in range(self.w)]
@@ -77,13 +80,16 @@ class Game_Map:
     def place_entities(self, room, entities, max_monsters_room): # load enemies
         
         num_monsters = random.randint(0, max_monsters_room)
+        fight_component = Fighter(hp = 10, defense = 1, power = 3)
 
         for i in range(num_monsters):
             x = random.randint(room.x1 + 1, room.x2 - 1)
             y = random.randint(room.y1 + 1, room.y2 - 1)
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                ai_component = Monster()
                 if random.randint(0, 100) < 80: 
-                    monster = Character(x, y, 'o', libtcod.desaturated_green, 'Ork', block = True)
+                    monster = Character(x, y, 'o', libtcod.desaturated_green, f'Ork{str(self.id)}', block = True, fighter= fight_component, ai = ai_component)
                 else:
-                    monster = Character(x, y, 'T', libtcod.darker_green, 'Tiranid', block = True)
+                    monster = Character(x, y, 'T', libtcod.darker_green, f'Tiranid{str(self.id)}', block = True, fighter = fight_component, ai = ai_component)
                 entities.append(monster)
+                self.id += 1
