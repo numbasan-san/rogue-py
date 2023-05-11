@@ -78,18 +78,17 @@ class Game_Map:
         return False
 
     def place_entities(self, room, entities, max_monsters_room): # load enemies
-        
+        fight_component = Fighter(10, 0, 3)
         num_monsters = random.randint(0, max_monsters_room)
-        fight_component = Fighter(hp = 10, defense = 1, power = 3)
 
         for i in range(num_monsters):
+            ai_component = Monster()
             x = random.randint(room.x1 + 1, room.x2 - 1)
             y = random.randint(room.y1 + 1, room.y2 - 1)
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-                ai_component = Monster()
                 if random.randint(0, 100) < 80: 
-                    monster = Character(x, y, 'o', libtcod.desaturated_green, f'Ork{str(self.id)}', block = True, fighter= fight_component, ai = ai_component)
+                    monster = Character(x, y, 'o', libtcod.desaturated_green, f'Ork{str(self.id)}', block = True, fighter=fight_component, ai=ai_component)
                 else:
-                    monster = Character(x, y, 'T', libtcod.darker_green, f'Tiranid{str(self.id)}', block = True, fighter = fight_component, ai = ai_component)
+                    monster = Character(x, y, 'T', libtcod.darker_green, f'Tiranid{str(self.id)}', block = True, fighter=fight_component, ai=ai_component)
                 entities.append(monster)
                 self.id += 1

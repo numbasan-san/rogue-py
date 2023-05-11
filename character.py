@@ -2,6 +2,7 @@
 # from map_setings.game_map import Game_Map
 
 import math
+
 import tcod as libtcod
 
 class Character:
@@ -16,16 +17,15 @@ class Character:
         self.block = block
         self.fighter = fighter
         self.ai = ai
-
         if self.fighter:
             self.fighter.owner = self
         if self.ai:
             self.ai.owner = self
     
-    def move(self, dx, dy): # character movement
+    def move(self, dx, dy):
         self.x += dx
         self.y += dy
-
+        
     def move_towards(self, target_x, target_y, game_map, entities): # enemy automatic movement in x and y
         dx = target_x - self.x
         dy = target_y - self.y
@@ -34,8 +34,8 @@ class Character:
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
 
-        if not(game_map.is_blocked((self.x + dx), (self.y + dy)) or \
-        self.collition_entity(entities, self.x + dx, self.y + dy)):
+        if not(game_map.is_blocked(self.x + dx, self.y + dy) or 
+               self.collition_entity(entities, self.x + dx, self.y + dy)):
             self.move(dx, dy)
 
     def move_astar(self, target, entities, game_map): # enemy automatic movement in vertical, horizontal and diagonal
@@ -64,14 +64,14 @@ class Character:
             self.move_towards(target.x, target.y, game_map, entities)
         
         libtcod.path_delete(my_path)
-    
+
     def distance_to(self, other): # calculate distance between enemy and player
         dx = other.x - self.x
         dy = other.y - self.y
         return math.sqrt((dx ** 2) + (dy ** 2))
 
     @staticmethod
-    def collition_entity(entities, coor_x, coor_y):  # name explain it self
+    def collition_entity(entities, coor_x, coor_y):
         for entity in entities:
             if entity.block and entity.x == coor_x and entity.y == coor_y:
                 return entity

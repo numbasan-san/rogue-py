@@ -1,9 +1,9 @@
 
 import sys, os, input_handler, render, fov_functions
 from components.fighter import Fighter
+from game_state import Game_State
 from map_setings.game_map import Game_Map
 from character import Character
-from game_state import Game_State
 import tcod as libtcod
 
 DATA_FOLDER = 'data'
@@ -24,10 +24,10 @@ def main():
     room_min_size = 6
     max_rooms = 30
 
-    # Field Of View - fov
+    # fov
     fov_algorithm = 0
     fov_light_walls = True
-    fov_radius = 90
+    fov_radius = 30
 
     # max monster per room
     max_monsters_room = 5
@@ -45,8 +45,8 @@ def main():
     game_map = Game_Map(map_w, map_h)
 
     # enteties declare
-    fight_component = Fighter(hp = 30, defense = 2, power = 5)
-    player = Character(int(screen_w / 2), int(screen_h / 2), '@', libtcod.orange, 'player', block = True, fighter = fight_component)
+    fight_component = Fighter(30, 3, 5)
+    player = Character(int(screen_w / 2), int(screen_h / 2), '@', libtcod.orange, 'player', block = True, fighter=fight_component)
     # npc = Character(int(screen_w / 2 - 5), int(screen_h / 2 - 5), '$', libtcod.purple)
     entities = [player]
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_w, map_h, player, entities, max_monsters_room) # create map
@@ -60,10 +60,10 @@ def main():
     key = libtcod.Key()
     mouse = libtcod.Mouse()
     fov_map = fov_functions.init_fov(game_map)
-    game_state = Game_State.PLAYER_TURN # variable to turns control
+    gs = Game_State.PLAYER_TURN
 
     while not libtcod.console_is_window_closed():
-        if fov_recompute: # recalculate fov
+        if fov_recompute:
             fov_functions.recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
         # load screen elements
@@ -79,45 +79,20 @@ def main():
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
 
-        player_results = []
-        if move and game_state == Game_State.PLAYER_TURN: # detecs player's moves and turn
+        if move and gs == Game_State.PLAYER_TURN: # player's moves and turn
             dx, dy = move
             if not game_map.is_blocked(player.x + dx, player.y + dy): # wall collision
+                # future player's move coor
                 coor_x = player.x + dx
                 coor_y = player.y + dy
-                target = player.collition_entity(entities, coor_x, coor_y) # collition with another entity
-                if target: # entity detected
+                target = player.collition_entity(entities, coor_x, coor_y)  # name explain it self
+                if target:
                     print(f'{target.name} in the way.')
-                    '''
-                    attack_result = player.fighter.attack(target)
-                    player_results.extend(attack_result)
-                    '''
-                else:  # entity detectedn't
+                else:
                     fov_recompute = True
                     player.move(dx, dy)
-            game_state = Game_State.MONSTER_TURN
-        
-        for player_result in player_results:
-            message = player_result.get('message')
-            dead = player_result.get('dead')
-            if message:
-                print(message)
-            if dead:
-                pass
-
-        if game_state == Game_State.MONSTER_TURN: # enemy turn
-            for entity in entities:
-                if entity.ai and fov_map.fov[entity.y][entity.x]: # to print only entity's actions inside fov 
-                    enemy_results = entity.ai.take_turn(player, fov_map, game_map, entities)
-                    for enemy_result in enemy_results:
-                        message = enemy_result.get('message')
-                        dead = enemy_result.get('dead')
-                        if message:
-                            print(message)
-                        if dead:
-                            pass
-            else:
-                game_state = Game_State.PLAYER_TURN
+            
+            gs = Game_State.MONSTER_TURN # change turn
 
         if exit:
             return True
@@ -125,7 +100,12 @@ def main():
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen)
 
-
+        if gs == Game_State.MONSTER_TURN: #monster's move
+            for entity in entities:
+                if entity.ai and fov_map.fov[entity.y][entity.x]:
+                    entity.ai.take_turn(player, fov_map, game_map, entities)
+                    # print(f'{entity.name} ponders the meaning of its existance.')
+            gs = Game_State.PLAYER_TURN # change turn
 
 if __name__ == "__main__":
     main()
