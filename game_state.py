@@ -1,7 +1,8 @@
 
 from enum import Enum
 
+
 class Game_State(Enum):
-    PLAYER_TURN = 0
-    MONSTER_TURN = 1
-    PLAYER_DEAD = 2
+    PLAYERS_TURN = 1
+    ENEMY_TURN = 2
+    PLAYER_DEAD = 3
